@@ -1,0 +1,5 @@
+package com.jackmcgrail.tv_remote
+
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity : FlutterActivity()
