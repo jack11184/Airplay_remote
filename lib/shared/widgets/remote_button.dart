@@ -27,7 +27,15 @@ class RemoteButton extends StatelessWidget {
 
   Future<void> _handleTap(BuildContext context) async {
     HapticFeedback.lightImpact();
-    final result = await onPressed();
+    CommandResult result = await onPressed();
+    if (!result.success) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      result = await onPressed();
+    }
+    if (!result.success) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      result = await onPressed();
+    }
     if (!result.success && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(result.errorMessage ?? 'Command failed')),

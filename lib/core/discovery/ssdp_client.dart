@@ -2,6 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+// ignore: unnecessary_import
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
+
 import '../network/network_info.dart';
 
 /// A parsed SSDP M-SEARCH response (an HTTP-over-UDP "200 OK" message).
@@ -59,6 +62,13 @@ class SsdpClient {
     Duration timeout = const Duration(seconds: 4),
     int mx = 2,
   }) {
+    // iOS blocks app-level UDP multicast without a special Apple-approved
+    // entitlement. Return an empty stream immediately; Bonjour handles
+    // discovery on iOS via the OS resolver instead.
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      return const Stream.empty();
+    }
+
     final controller = StreamController<SsdpResponse>();
     final sockets = <RawDatagramSocket>[];
     var closed = false;
@@ -96,18 +106,22 @@ class SsdpClient {
           socket
             ..broadcastEnabled = true
             ..multicastHops = 4;
-          socket.listen((event) {
-            if (event != RawSocketEvent.read) return;
-            final datagram = socket.receive();
-            if (datagram == null) return;
-            final response = _parse(
-              utf8.decode(datagram.data, allowMalformed: true),
-              datagram.address.address,
-            );
-            if (response != null && !controller.isClosed) {
-              controller.add(response);
-            }
-          });
+          socket.listen(
+            (event) {
+              if (event != RawSocketEvent.read) return;
+              final datagram = socket.receive();
+              if (datagram == null) return;
+              final response = _parse(
+                utf8.decode(datagram.data, allowMalformed: true),
+                datagram.address.address,
+              );
+              if (response != null && !controller.isClosed) {
+                controller.add(response);
+              }
+            },
+            onError: (Object _, StackTrace __) {},
+            cancelOnError: false,
+          );
           sockets.add(socket);
 
           for (final st in searchTargets) {
@@ -117,11 +131,13 @@ class SsdpClient {
                 'MX: $mx\r\n'
                 'ST: $st\r\n'
                 '\r\n';
-            socket.send(
-              utf8.encode(message),
-              _multicastAddress,
-              _multicastPort,
-            );
+            try {
+              socket.send(
+                utf8.encode(message),
+                _multicastAddress,
+                _multicastPort,
+              );
+            } catch (_) {}
           }
         } catch (_) {
           // A single interface failing to bind/send (e.g. a down VPN adapter)

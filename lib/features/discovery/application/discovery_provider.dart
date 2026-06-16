@@ -57,6 +57,10 @@ final discoveryProvider =
 
 /// Previously paired/known devices, loaded from secure storage.
 final pairedDevicesProvider = FutureProvider<List<TvDevice>>((ref) async {
-  final repo = ref.watch(deviceRepositoryProvider);
-  return repo.loadDevices();
+  try {
+    final repo = ref.watch(deviceRepositoryProvider);
+    return repo.loadDevices();
+  } catch (e) {
+    return [];
+  }
 });
