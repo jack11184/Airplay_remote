@@ -43,6 +43,10 @@ dependencies:
   json_annotation: ^4.12.0
   go_router: ^17.3.0
   xml: ^7.0.1
+  # Native Bonjour/mDNS discovery (uses the OS Bonjour APIs, so it works on
+  # iOS without the special multicast entitlement). Required to find Vizio
+  # SmartCast TVs, which advertise on `_viziocast._tcp` and are silent on SSDP.
+  bonsoir: ^7.1.3
 
 dev_dependencies:
   flutter_test:

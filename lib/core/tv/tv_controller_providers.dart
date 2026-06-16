@@ -42,14 +42,24 @@ final tvConnectProvider =
   final controller = ref.watch(tvControllerInstanceProvider(device));
   final repo = ref.watch(deviceRepositoryProvider);
 
+  // Persisting the device/credential is best-effort: a storage failure (e.g.
+  // a macOS keychain entitlement issue) must never prevent controlling a TV
+  // that has already paired successfully.
+  Future<void> persist(TvDevice toSave) async {
+    try {
+      await repo.upsertDevice(toSave);
+      ref.invalidate(pairedDevicesProvider);
+    } catch (_) {
+      // Device simply won't be remembered across launches.
+    }
+  }
+
   final pairingSub = controller.pairingKeyUpdates.listen((key) {
-    repo.upsertDevice(device.copyWith(pairingKey: key));
-    ref.invalidate(pairedDevicesProvider);
+    persist(device.copyWith(pairingKey: key));
   });
   ref.onDispose(pairingSub.cancel);
 
   await controller.connect();
-  await repo.upsertDevice(device);
-  ref.invalidate(pairedDevicesProvider);
+  await persist(device);
   return controller;
 });

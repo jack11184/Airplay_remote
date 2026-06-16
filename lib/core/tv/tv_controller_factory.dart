@@ -4,6 +4,7 @@ import '../storage/secure_storage_service.dart';
 import 'roku/roku_controller.dart';
 import 'tizen/tizen_controller.dart';
 import 'tv_controller.dart';
+import 'vizio/vizio_controller.dart';
 import 'webos/webos_controller.dart';
 
 /// Builds the right [TvController] implementation for a [TvDevice] based on
@@ -22,6 +23,8 @@ class TvControllerFactory {
         return WebOsController(device);
       case TvProtocol.tizen:
         return TizenController(device);
+      case TvProtocol.vizio:
+        return VizioController(device);
     }
   }
 }

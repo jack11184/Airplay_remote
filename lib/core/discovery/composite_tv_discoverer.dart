@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import '../../models/tv_device.dart';
+import 'bonjour_vizio_discoverer.dart';
 import 'roku_discoverer.dart';
 import 'tizen_discoverer.dart';
 import 'tv_discoverer.dart';
+import 'vizio_discoverer.dart';
 import 'webos_discoverer.dart';
 
 /// Runs all [TvDiscoverer]s concurrently and merges their results into a
@@ -15,6 +17,8 @@ class CompositeTvDiscoverer {
               RokuSsdpDiscoverer(),
               WebOsSsdpDiscoverer(),
               TizenSsdpDiscoverer(),
+              VizioSsdpDiscoverer(),
+              BonjourVizioDiscoverer(),
             ];
 
   final List<TvDiscoverer> _discoverers;

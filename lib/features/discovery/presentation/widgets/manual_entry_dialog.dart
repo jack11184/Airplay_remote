@@ -36,7 +36,7 @@ class _ManualEntryDialogState extends State<ManualEntryDialog> {
             items: TvProtocol.values
                 .map((protocol) => DropdownMenuItem(
                       value: protocol,
-                      child: Text(_label(protocol)),
+                      child: Text(protocol.label),
                     ))
                 .toList(),
             onChanged: (value) {
@@ -66,7 +66,7 @@ class _ManualEntryDialogState extends State<ManualEntryDialog> {
             Navigator.of(context).pop(
               TvDevice(
                 id: '${_protocol.name}:$ip',
-                name: '${_label(_protocol)} TV',
+                name: '${_protocol.label} TV',
                 ipAddress: ip,
                 protocol: _protocol,
               ),
@@ -76,16 +76,5 @@ class _ManualEntryDialogState extends State<ManualEntryDialog> {
         ),
       ],
     );
-  }
-
-  String _label(TvProtocol protocol) {
-    switch (protocol) {
-      case TvProtocol.roku:
-        return 'Roku';
-      case TvProtocol.webOs:
-        return 'LG webOS';
-      case TvProtocol.tizen:
-        return 'Samsung Tizen';
-    }
   }
 }

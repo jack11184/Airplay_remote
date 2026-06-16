@@ -28,6 +28,12 @@
 	<true/>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>TV Remote discovers and connects to TVs on your local network so it can be used as a remote control.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_viziocast._tcp</string>
+		<string>_googlecast._tcp</string>
+		<string>_airplay._tcp</string>
+	</array>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>

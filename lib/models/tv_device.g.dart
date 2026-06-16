@@ -28,4 +28,5 @@ const _$TvProtocolEnumMap = {
   TvProtocol.roku: 'roku',
   TvProtocol.webOs: 'webOs',
   TvProtocol.tizen: 'tizen',
+  TvProtocol.vizio: 'vizio',
 };

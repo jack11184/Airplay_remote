@@ -9,6 +9,8 @@ import '../../../models/tv_connection_state.dart';
 import '../../../models/tv_device.dart';
 import '../../../shared/widgets/remote_button.dart';
 import 'widgets/dpad_widget.dart';
+import 'widgets/input_sheet.dart';
+import 'widgets/keyboard_sheet.dart';
 import 'widgets/number_pad_sheet.dart';
 
 class RemoteScreen extends ConsumerWidget {
@@ -99,16 +101,27 @@ class _RemoteControls extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
         child: Column(
           children: [
-            Align(
-              alignment: Alignment.centerRight,
-              child: RemoteButton(
-                icon: Icons.power_settings_new,
-                tooltip: 'Power',
-                backgroundColor: Theme.of(context).colorScheme.errorContainer,
-                foregroundColor:
-                    Theme.of(context).colorScheme.onErrorContainer,
-                onPressed: controller.sendPower,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                RemoteButton(
+                  icon: Icons.input,
+                  tooltip: 'Input',
+                  onPressed: () async {
+                    await InputSheet.show(context, controller);
+                    return CommandResult.ok();
+                  },
+                ),
+                RemoteButton(
+                  icon: Icons.power_settings_new,
+                  tooltip: 'Power',
+                  backgroundColor:
+                      Theme.of(context).colorScheme.errorContainer,
+                  foregroundColor:
+                      Theme.of(context).colorScheme.onErrorContainer,
+                  onPressed: controller.sendPower,
+                ),
+              ],
             ),
             const Spacer(),
             DPadWidget(controller: controller),
@@ -125,6 +138,14 @@ class _RemoteControls extends StatelessWidget {
                   icon: Icons.arrow_back,
                   tooltip: 'Back',
                   onPressed: controller.sendBack,
+                ),
+                RemoteButton(
+                  icon: Icons.keyboard,
+                  tooltip: 'Keyboard',
+                  onPressed: () async {
+                    await KeyboardSheet.show(context, controller);
+                    return CommandResult.ok();
+                  },
                 ),
                 RemoteButton(
                   icon: Icons.dialpad,

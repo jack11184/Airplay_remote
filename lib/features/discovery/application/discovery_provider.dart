@@ -31,7 +31,9 @@ class DiscoveryNotifier extends AsyncNotifier<List<TvDevice>> {
     state = const AsyncData([]);
 
     final discoverer = ref.read(compositeTvDiscovererProvider);
-    _subscription = discoverer.discoverAll().listen(
+    _subscription = discoverer
+        .discoverAll(timeout: const Duration(seconds: 6))
+        .listen(
       (device) {
         results.add(device);
         state = AsyncData(List.unmodifiable(results));

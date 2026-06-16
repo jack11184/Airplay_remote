@@ -128,6 +128,20 @@ class TizenWsClient {
     });
   }
 
+  /// Types [text] into the TV's focused text field, replacing its current
+  /// contents. Samsung accepts the whole string base64-encoded via the
+  /// `SendInputString` remote command.
+  void sendInputString(String text) {
+    _send({
+      'method': 'ms.remote.control',
+      'params': {
+        'Cmd': base64.encode(utf8.encode(text)),
+        'DataOfCmd': 'base64',
+        'TypeOfRemote': 'SendInputString',
+      },
+    });
+  }
+
   /// Requests that the TV launch the app identified by [appId].
   void launchApp(String appId) {
     _send({

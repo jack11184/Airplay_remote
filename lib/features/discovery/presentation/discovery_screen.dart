@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/network/network_providers.dart';
 import '../../../models/tv_device.dart';
 import '../../../models/tv_protocol.dart';
 import '../../../shared/widgets/section_header.dart';
@@ -18,6 +19,7 @@ class DiscoveryScreen extends ConsumerWidget {
     final paired = ref.watch(pairedDevicesProvider);
     final isScanning = ref.watch(discoveryProvider.notifier).isScanning;
     final pairedIds = paired.value?.map((d) => d.id).toSet() ?? <String>{};
+    final network = ref.watch(currentNetworkProvider).value;
 
     return Scaffold(
       appBar: AppBar(
@@ -34,17 +36,42 @@ class DiscoveryScreen extends ConsumerWidget {
         child: ListView(
           children: [
             if (isScanning)
-              const Padding(
-                padding: EdgeInsets.all(16),
+              Padding(
+                padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    SizedBox(
+                    const SizedBox(
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     ),
-                    SizedBox(width: 12),
-                    Text('Scanning for TVs on your network...'),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        network == null
+                            ? 'Scanning for TVs on your network...'
+                            : 'Scanning ${network.subnetLabel} '
+                                '(${network.interfaceName}) for TVs...',
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else if (network != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.wifi,
+                      size: 16,
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'On ${network.subnetLabel} (${network.interfaceName})',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
                   ],
                 ),
               ),
@@ -122,7 +149,7 @@ class DiscoveryScreen extends ConsumerWidget {
 
   void _connect(BuildContext context, TvDevice device) {
     final needsPairing =
-        device.protocol != TvProtocol.roku && device.pairingKey == null;
+        device.protocol.requiresPairing && device.pairingKey == null;
     if (needsPairing) {
       context.push('/pairing', extra: device);
     } else {

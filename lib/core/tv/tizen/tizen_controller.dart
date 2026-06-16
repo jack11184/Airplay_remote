@@ -5,6 +5,7 @@ import '../../../models/tv_app.dart';
 import '../../../models/tv_connection_state.dart';
 import '../../../models/tv_device.dart';
 import '../../../models/tv_device_info.dart';
+import '../../../models/tv_input.dart';
 import '../tv_controller.dart';
 import 'tizen_rest_client.dart';
 import 'tizen_ws_client.dart';
@@ -64,6 +65,12 @@ class TizenController implements TvController {
       rethrow;
     }
   }
+
+  @override
+  Future<CommandResult> submitPairingCode(String code) async =>
+      CommandResult.failure(
+        'Samsung pairs via the on-screen prompt, not a code.',
+      );
 
   @override
   Future<void> disconnect() async {
@@ -145,6 +152,40 @@ class TizenController implements TvController {
       return CommandResult.failure('$e');
     }
   }
+
+  @override
+  Future<List<TvInput>?> listInputs() async => null;
+
+  @override
+  Future<CommandResult> selectInput(TvInput input) =>
+      Future.value(_sendKey(input.id));
+
+  @override
+  Future<CommandResult> sendInput() => Future.value(_sendKey('KEY_SOURCE'));
+
+  @override
+  bool get supportsKeyboard => true;
+
+  @override
+  bool get keyboardIsIncremental => false;
+
+  @override
+  Future<CommandResult> sendText(String text) async {
+    try {
+      _client.sendInputString(text);
+      return CommandResult.ok();
+    } catch (e) {
+      return CommandResult.failure('$e');
+    }
+  }
+
+  @override
+  Future<CommandResult> sendKeyboardBackspace() =>
+      Future.value(_sendKey('KEY_DELETE'));
+
+  @override
+  Future<CommandResult> sendKeyboardEnter() =>
+      Future.value(_sendKey('KEY_ENTER'));
 
   @override
   Future<TvDeviceInfo> getDeviceInfo() => _restClient.getDeviceInfo();

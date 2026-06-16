@@ -5,6 +5,7 @@ import '../../../models/tv_app.dart';
 import '../../../models/tv_connection_state.dart';
 import '../../../models/tv_device.dart';
 import '../../../models/tv_device_info.dart';
+import '../../../models/tv_input.dart';
 import '../tv_controller.dart';
 import 'webos_pointer_client.dart';
 import 'webos_ssap_client.dart';
@@ -75,6 +76,12 @@ class WebOsController implements TvController {
       // be opened; other commands are unaffected.
     }
   }
+
+  @override
+  Future<CommandResult> submitPairingCode(String code) async =>
+      CommandResult.failure(
+        'LG webOS pairs via the on-screen prompt, not a code.',
+      );
 
   @override
   Future<void> disconnect() async {
@@ -191,6 +198,56 @@ class WebOsController implements TvController {
   @override
   Future<CommandResult> launchApp(TvApp app) =>
       _request('ssap://system.launcher/launch', {'id': app.id});
+
+  @override
+  Future<List<TvInput>?> listInputs() async {
+    try {
+      final response =
+          await _client.request('ssap://tv/getExternalInputList');
+      final devices = response['devices'] as List<Object?>? ?? [];
+      final inputs = <TvInput>[];
+      for (final entry in devices) {
+        if (entry is! Map) continue;
+        final id = entry['id'] as String?;
+        if (id == null) continue;
+        final label = entry['label'] as String?;
+        inputs.add(TvInput(id: id, name: label ?? id));
+      }
+      return inputs.isEmpty ? null : inputs;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  @override
+  Future<CommandResult> selectInput(TvInput input) =>
+      _request('ssap://tv/switchInput', {'inputId': input.id});
+
+  @override
+  Future<CommandResult> sendInput() async =>
+      CommandResult.failure('Could not load inputs for ${device.name}.');
+
+  @override
+  bool get supportsKeyboard => true;
+
+  @override
+  bool get keyboardIsIncremental => true;
+
+  @override
+  Future<CommandResult> sendText(String text) => _request(
+        'ssap://com.webos.service.ime/insertText',
+        {'text': text, 'replace': false},
+      );
+
+  @override
+  Future<CommandResult> sendKeyboardBackspace() => _request(
+        'ssap://com.webos.service.ime/deleteCharacters',
+        {'count': 1},
+      );
+
+  @override
+  Future<CommandResult> sendKeyboardEnter() =>
+      _request('ssap://com.webos.service.ime/sendEnterKey');
 
   @override
   Future<TvDeviceInfo> getDeviceInfo() async {

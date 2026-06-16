@@ -32,6 +32,8 @@ class DeviceListTile extends StatelessWidget {
         return Icons.live_tv;
       case TvProtocol.tizen:
         return Icons.smart_display;
+      case TvProtocol.vizio:
+        return Icons.cast_connected;
     }
   }
 }

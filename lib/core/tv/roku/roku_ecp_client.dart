@@ -23,6 +23,13 @@ class RokuEcpClient {
     await _dio.post('/keypress/$key');
   }
 
+  /// Types a single literal character into a focused field via the ECP
+  /// `Lit_<char>` key. The character is percent-encoded so spaces and
+  /// punctuation are transmitted safely.
+  Future<void> keypressLiteral(String char) async {
+    await _dio.post('/keypress/Lit_${Uri.encodeComponent(char)}');
+  }
+
   Future<void> launchApp(String appId) async {
     await _dio.post('/launch/$appId');
   }

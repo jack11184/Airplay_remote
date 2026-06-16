@@ -7,6 +7,7 @@ import '../../../models/tv_app.dart';
 import '../../../models/tv_connection_state.dart';
 import '../../../models/tv_device.dart';
 import '../../../models/tv_device_info.dart';
+import '../../../models/tv_input.dart';
 import '../tv_controller.dart';
 import 'roku_ecp_client.dart';
 
@@ -43,6 +44,10 @@ class RokuController implements TvController {
       rethrow;
     }
   }
+
+  @override
+  Future<CommandResult> submitPairingCode(String code) async =>
+      CommandResult.failure('Roku does not require a pairing code.');
 
   @override
   Future<void> disconnect() async {
@@ -120,6 +125,46 @@ class RokuController implements TvController {
       );
     }
   }
+
+  @override
+  Future<List<TvInput>?> listInputs() async => const [
+        TvInput(id: 'InputTuner', name: 'Antenna'),
+        TvInput(id: 'InputHDMI1', name: 'HDMI 1'),
+        TvInput(id: 'InputHDMI2', name: 'HDMI 2'),
+        TvInput(id: 'InputHDMI3', name: 'HDMI 3'),
+        TvInput(id: 'InputHDMI4', name: 'HDMI 4'),
+        TvInput(id: 'InputAV1', name: 'AV'),
+      ];
+
+  @override
+  Future<CommandResult> selectInput(TvInput input) => _keypress(input.id);
+
+  @override
+  Future<CommandResult> sendInput() => _keypress('InputHDMI1');
+
+  @override
+  bool get supportsKeyboard => true;
+
+  @override
+  bool get keyboardIsIncremental => true;
+
+  @override
+  Future<CommandResult> sendText(String text) async {
+    try {
+      for (final rune in text.runes) {
+        await _client.keypressLiteral(String.fromCharCode(rune));
+      }
+      return CommandResult.ok();
+    } on DioException catch (e) {
+      return CommandResult.failure(e.message ?? 'Failed to type');
+    }
+  }
+
+  @override
+  Future<CommandResult> sendKeyboardBackspace() => _keypress('Backspace');
+
+  @override
+  Future<CommandResult> sendKeyboardEnter() => _keypress('Enter');
 
   @override
   Future<TvDeviceInfo> getDeviceInfo() => _client.getDeviceInfo();
